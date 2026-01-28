@@ -12,11 +12,11 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, getDocs, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js";
 
         // ==========================================
-        // Firebase 設定區 - 已寫入您的專屬代碼
+        // Firebase 設定區
         // ==========================================
         let firebaseConfig = {
             apiKey: "AIzaSyAXahIPb1rI1cpDUCSb2yDQJwwJPItnlJE",
@@ -28,7 +28,6 @@
             measurementId: "G-L6BTPP1W3B"
         };
 
-        // 如果環境中有預定義的 config 則優先使用 (預覽環境相容性)
         if (typeof __firebase_config !== 'undefined') {
             try {
                 firebaseConfig = JSON.parse(__firebase_config);
@@ -39,7 +38,6 @@
 
         const app = initializeApp(firebaseConfig);
         
-        // 防護 Analytics 初始化
         try {
             const analytics = getAnalytics(app);
         } catch (e) {
@@ -48,11 +46,8 @@
 
         const auth = getAuth(app);
         const db = getFirestore(app);
-        
-        // 設定路徑用的 appId
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'corin-beauty-app';
 
-        // 身份驗證初始化
         const initAuth = async () => {
             try {
                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
@@ -61,21 +56,22 @@
                     await signInAnonymously(auth);
                 }
             } catch (error) {
-                console.error("Auth error:", error);
+                console.error("Firebase Auth Error:", error.message);
             }
         };
         initAuth();
 
-        // 將方法掛載到 window 供表單使用
+        // 將方法掛載到 window 供全域使用
         window.db = db;
         window.appId = appId;
         window.addDoc = addDoc;
+        window.getDocs = getDocs;
+        window.query = query;
+        window.orderBy = orderBy;
         window.collection = collection;
         window.serverTimestamp = serverTimestamp;
         window.auth = auth;
-        // 額外導出登入方法以備不時之需
         window.signInAnonymously = signInAnonymously;
-        window.signInWithCustomToken = signInWithCustomToken;
     </script>
 
     <style>
@@ -86,7 +82,6 @@
         .font-serif {
             font-family: 'Playfair Display', serif;
         }
-        /* 滾動動畫設定 */
         .reveal {
             opacity: 0;
             transform: translateY(40px);
@@ -107,7 +102,6 @@
         .image-overlay {
             background: linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.5));
         }
-        /* 特殊按鈕樣式 */
         .btn-gold {
             background: #b49164;
             color: white;
@@ -121,6 +115,10 @@
             background: #d1d5db;
             cursor: not-allowed;
         }
+        /* 管理者面板動畫 */
+        #admin-panel {
+            transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
     </style>
 </head>
 <body class="bg-white text-gray-800">
@@ -128,8 +126,6 @@
     <!-- 導覽列 -->
     <nav id="navbar" class="fixed w-full z-50 transition-all duration-500 py-6 px-6 md:px-12 flex justify-between items-center">
         <div class="text-2xl font-serif font-bold tracking-[0.2em] text-stone-800">CORIN <span class="text-stone-400 font-light">ACADEMY</span></div>
-        
-        <!-- 桌機選單 -->
         <div class="hidden md:flex space-x-10 text-xs font-bold tracking-widest uppercase">
             <a href="#home" class="hover:text-amber-700 transition">首頁</a>
             <a href="#about" class="hover:text-amber-700 transition">教學理念</a>
@@ -137,8 +133,6 @@
             <a href="#features" class="hover:text-amber-700 transition">技術優勢</a>
             <a href="#contact" class="hover:text-amber-700 transition">預約報名</a>
         </div>
-
-        <!-- 手機選單按鈕 -->
         <button id="mobile-menu-btn" class="md:hidden">
             <i data-lucide="menu" class="w-6 h-6"></i>
         </button>
@@ -162,7 +156,6 @@
             <img src="https://images.unsplash.com/photo-1616394584738-fc6e612e71b9?auto=format&fit=crop&w=1920&q=80" alt="Beauty Training Background" class="w-full h-full object-cover">
             <div class="absolute inset-0 image-overlay"></div>
         </div>
-        
         <div class="relative z-10 text-center px-4">
             <h2 class="text-white text-sm md:text-base tracking-[0.5em] mb-6 reveal uppercase">Professional Hair Removal Training</h2>
             <h1 class="text-white text-5xl md:text-8xl font-serif mb-10 reveal" style="transition-delay: 200ms;">日式極致除毛<br><span class="text-3xl md:text-5xl font-light italic">創業全科班</span></h1>
@@ -170,15 +163,11 @@
                 <a href="#contact" class="inline-block bg-white text-stone-900 px-10 py-4 hover:bg-stone-900 hover:text-white transition duration-500 tracking-[0.2em] font-bold text-sm">索取簡章</a>
             </div>
         </div>
-        
-        <div class="absolute bottom-12 left-1/2 -translate-x-1/2 text-white/50 animate-bounce">
-            <i data-lucide="mouse" class="w-5 h-5"></i>
-        </div>
     </section>
 
-    <!-- About / Philosophy -->
-    <section id="about" class="py-24 px-6 md:px-12 bg-white">
-        <div class="max-w-5xl mx-auto text-center reveal">
+    <!-- About Section -->
+    <section id="about" class="py-24 px-6 md:px-12 bg-white text-center">
+        <div class="max-w-5xl mx-auto reveal">
             <span class="text-amber-600 font-serif italic text-xl block mb-4">Our Philosophy</span>
             <h3 class="text-4xl font-bold mb-10 tracking-tight text-stone-800">從理論到實戰，打造除毛美學專家</h3>
             <p class="text-stone-500 leading-[2] max-w-3xl mx-auto mb-16">
@@ -210,23 +199,19 @@
         <div class="max-w-6xl mx-auto">
             <div class="flex flex-col md:flex-row justify-between items-end mb-16 reveal">
                 <div class="mb-6 md:mb-0">
-                    <h2 class="text-4xl font-serif mb-4">課程核心項目</h2>
+                    <h2 class="text-4xl font-serif mb-4 text-stone-800">課程核心項目</h2>
                     <div class="w-20 h-1 bg-amber-700"></div>
                 </div>
                 <p class="text-stone-400 text-sm tracking-widest italic">Curriculum Highlights</p>
             </div>
-
             <div class="grid md:grid-cols-2 gap-x-12 gap-y-16">
-                <!-- 項目 1 -->
                 <div class="flex space-x-6 reveal">
                     <div class="text-4xl font-serif text-stone-300">01</div>
                     <div>
                         <h4 class="text-xl font-bold mb-3">皮膚學與毛髮生理學</h4>
-                        <p class="text-stone-500 text-sm leading-relaxed">深入了解毛囊生長週期（成長期、退行期、休止期）、皮膚類型辨識及除毛禁忌症，確保操作安全性。</p>
+                        <p class="text-stone-500 text-sm leading-relaxed">深入了解毛囊生長週期、皮膚類型辨識及除毛禁忌症，確保操作安全性。</p>
                     </div>
                 </div>
-
-                <!-- 項目 2 -->
                 <div class="flex space-x-6 reveal" style="transition-delay: 100ms;">
                     <div class="text-4xl font-serif text-stone-300">02</div>
                     <div>
@@ -234,22 +219,18 @@
                         <p class="text-stone-500 text-sm leading-relaxed">教授如何進行課前溝通、課後居家護理建議，以及處理突發狀況的專業應對標準。</p>
                     </div>
                 </div>
-
-                <!-- 項目 3 -->
                 <div class="flex space-x-6 reveal" style="transition-delay: 200ms;">
                     <div class="text-4xl font-serif text-stone-300">03</div>
                     <div>
                         <h4 class="text-xl font-bold mb-3">全方位實操演練</h4>
-                        <p class="text-stone-500 text-sm leading-relaxed">包含臉部細毛、腋下、四肢及私密處（VIO）的實作流程，掌握無死角的操作手感與角度。</p>
+                        <p class="text-stone-500 text-sm leading-relaxed">包含臉部、腋下、四肢及私密處實作流程，掌握無死角的操作手感。</p>
                     </div>
                 </div>
-
-                <!-- 項目 4 -->
                 <div class="flex space-x-6 reveal" style="transition-delay: 300ms;">
                     <div class="text-4xl font-serif text-stone-300">04</div>
                     <div>
                         <h4 class="text-xl font-bold mb-3">衛生管理與創業指導</h4>
-                        <p class="text-stone-500 text-sm leading-relaxed">建立高標準的環境消毒流程、耗材成本控制，並提供品牌定位與社群行銷的實戰建議，協助您順利開業。</p>
+                        <p class="text-stone-500 text-sm leading-relaxed">建立高標準消毒流程與成本控制，提供品牌定位與社群行銷建議。</p>
                     </div>
                 </div>
             </div>
@@ -257,16 +238,16 @@
     </section>
 
     <!-- Features Section -->
-    <section id="features" class="relative py-32 overflow-hidden bg-stone-900">
+    <section id="features" class="relative py-32 bg-stone-900 text-white overflow-hidden">
         <div class="absolute inset-0 opacity-40">
-            <img src="https://images.unsplash.com/photo-1527799822367-474857a3f447?auto=format&fit=crop&w=1920&q=80" alt="Advanced Tech" class="w-full h-full object-cover">
+            <img src="https://images.unsplash.com/photo-1527799822367-474857a3f447?auto=format&fit=crop&w=1920&q=80" alt="Tech" class="w-full h-full object-cover">
         </div>
-        <div class="relative z-10 max-w-4xl mx-auto px-6 text-center text-white reveal">
+        <div class="relative z-10 max-w-4xl mx-auto px-6 text-center reveal">
             <h2 class="text-3xl md:text-5xl font-serif mb-8 italic">為什麼選擇「日式除毛」技術？</h2>
             <div class="grid md:grid-cols-3 gap-8 mt-16 text-left">
                 <div class="p-6 border border-white/20 backdrop-blur-sm">
                     <h5 class="font-bold mb-4 flex items-center"><i data-lucide="zap" class="w-4 h-4 mr-2 text-amber-400"></i> 極速效率</h5>
-                    <p class="text-xs text-white/70 leading-relaxed">採用滑動式操作，局部除毛僅需 15-40 分鐘，大大縮短顧客等待時間。</p>
+                    <p class="text-xs text-white/70 leading-relaxed">採用滑動式操作，局部除毛僅需 15-40 分鐘，大大縮短等待時間。</p>
                 </div>
                 <div class="p-6 border border-white/20 backdrop-blur-sm">
                     <h5 class="font-bold mb-4 flex items-center"><i data-lucide="wind" class="w-4 h-4 mr-2 text-amber-400"></i> 無痛體驗</h5>
@@ -286,14 +267,10 @@
             <div class="reveal">
                 <h2 class="text-4xl font-serif mb-8">報名諮詢</h2>
                 <p class="text-stone-500 mb-12">如果您對課程有任何疑問，請填寫下方表單 聯繫我們。</p>
-                
-                <div class="bg-amber-50 p-8 border-l-4 border-amber-200">
-                    <p class="text-stone-600 text-sm leading-relaxed">
-                        我們會在收到您的諮詢申請後，於上班時間由專人主動與您聯繫，為您詳細說明課程內容與費用方案。
-                    </p>
+                <div class="bg-amber-50 p-8 border-l-4 border-amber-200 text-stone-600 text-sm leading-relaxed">
+                    我們會在收到您的諮詢申請後，於上班時間由專人主動與您聯繫。
                 </div>
             </div>
-
             <div class="bg-stone-50 p-10 reveal" style="transition-delay: 200ms;">
                 <h3 class="text-xl font-bold mb-8 flex items-center"><i data-lucide="edit-3" class="mr-2 w-5 h-5 text-amber-700"></i> 填寫需求</h3>
                 <form id="enroll-form" class="space-y-6">
@@ -304,13 +281,7 @@
                         </div>
                         <div class="space-y-2">
                             <label class="text-xs font-bold uppercase tracking-wider text-stone-400">電話</label>
-                            <!-- 加上強制驗證：09開頭及後面8碼數字，總共10位 -->
-                            <input type="tel" id="form-phone" required 
-                                   pattern="09[0-9]{8}" 
-                                   maxlength="10" 
-                                   title="請輸入正確的 10 位手機號碼（例：0912345678）"
-                                   class="w-full bg-transparent border-b border-stone-300 py-2 focus:outline-none focus:border-amber-700 transition" 
-                                   placeholder="例：0912345678">
+                            <input type="tel" id="form-phone" required pattern="09[0-9]{8}" maxlength="10" title="請輸入正確的 10 位手機號碼" class="w-full bg-transparent border-b border-stone-300 py-2 focus:outline-none focus:border-amber-700 transition" placeholder="0912345678">
                         </div>
                     </div>
                     <div class="grid grid-cols-2 gap-4">
@@ -320,7 +291,7 @@
                         </div>
                         <div class="space-y-2">
                             <label class="text-xs font-bold uppercase tracking-wider text-stone-400">居住區域</label>
-                            <input type="text" id="form-area" required class="w-full bg-transparent border-b border-stone-300 py-2 focus:outline-none focus:border-amber-700 transition" placeholder="例如：台北市大安區">
+                            <input type="text" id="form-area" required class="w-full bg-transparent border-b border-stone-300 py-2 focus:outline-none focus:border-amber-700 transition" placeholder="台北市大安區">
                         </div>
                     </div>
                     <div class="space-y-2">
@@ -333,7 +304,7 @@
                     </div>
                     <div class="space-y-2">
                         <label class="text-xs font-bold uppercase tracking-wider text-stone-400">留言訊息</label>
-                        <textarea id="form-message" rows="3" class="w-full bg-transparent border-b border-stone-300 py-2 focus:outline-none focus:border-amber-700 transition" placeholder="例如：想了解學費、開課日期..."></textarea>
+                        <textarea id="form-message" rows="3" class="w-full bg-transparent border-b border-stone-300 py-2 focus:outline-none focus:border-amber-700 transition"></textarea>
                     </div>
                     <button type="submit" id="submit-btn" class="w-full btn-gold py-5 font-bold tracking-[0.3em] uppercase text-xs mt-4">送出諮詢</button>
                 </form>
@@ -355,13 +326,59 @@
         <div class="max-w-6xl mx-auto mt-12 flex flex-col md:flex-row justify-between items-center text-[10px] text-stone-500 tracking-widest uppercase">
             <p>&copy; 2026 CORIN ACADEMY. BEAUTY IS A JOURNEY.</p>
             <div class="mt-4 md:mt-0 space-x-4">
-                <span>Designed for Professional Corin</span>
+                <span onclick="checkAdminPassword()" class="cursor-pointer hover:text-white transition">Designed for Professional Corin</span>
             </div>
         </div>
     </footer>
 
+    <!-- 管理者面板 (預設隱藏) -->
+    <div id="admin-panel" class="fixed inset-0 z-[100] bg-white translate-x-full overflow-hidden flex flex-col">
+        <div class="bg-stone-900 text-white px-6 py-4 flex justify-between items-center">
+            <h2 class="font-serif tracking-widest">後台管理中心</h2>
+            <button onclick="closeAdminPanel()" class="hover:text-amber-400 transition">
+                <i data-lucide="x"></i>
+            </button>
+        </div>
+        <div class="flex-1 overflow-auto p-6 bg-stone-50">
+            <div class="max-w-7xl mx-auto">
+                <div class="flex justify-between items-center mb-8">
+                    <div>
+                        <h3 class="text-2xl font-bold text-stone-800">諮詢名單總覽</h3>
+                        <p class="text-stone-400 text-sm mt-1">即時抓取最新諮詢表單資料</p>
+                    </div>
+                    <button onclick="fetchInquiries()" class="flex items-center space-x-2 bg-white border border-stone-200 px-4 py-2 text-sm hover:bg-stone-100 transition rounded shadow-sm">
+                        <i data-lucide="refresh-cw" class="w-4 h-4" id="refresh-icon"></i>
+                        <span>重新整理</span>
+                    </button>
+                </div>
+
+                <div class="bg-white rounded shadow-sm overflow-hidden border border-stone-200">
+                    <table class="min-w-full text-sm">
+                        <thead class="bg-stone-100 border-b border-stone-200">
+                            <tr>
+                                <th class="px-6 py-4 text-left font-bold text-stone-600">填寫時間</th>
+                                <th class="px-6 py-4 text-left font-bold text-stone-600">姓名</th>
+                                <th class="px-6 py-4 text-left font-bold text-stone-600">電話 / Line</th>
+                                <th class="px-6 py-4 text-left font-bold text-stone-600">地區</th>
+                                <th class="px-6 py-4 text-left font-bold text-stone-600">班別</th>
+                                <th class="px-6 py-4 text-left font-bold text-stone-600">留言備註</th>
+                            </tr>
+                        </thead>
+                        <tbody id="inquiry-tbody" class="divide-y divide-stone-100">
+                            <!-- 資料會插入到這裡 -->
+                        </tbody>
+                    </table>
+                    <div id="loading-state" class="p-20 text-center text-stone-400">
+                        <i data-lucide="loader" class="w-8 h-8 mx-auto animate-spin mb-4"></i>
+                        正在連線至資料庫...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Toast 通知 -->
-    <div id="toast" class="fixed bottom-10 right-10 bg-stone-800 text-white px-8 py-4 shadow-2xl transform translate-y-32 opacity-0 transition-all duration-500 z-[100] border-l-4 border-amber-600">
+    <div id="toast" class="fixed bottom-10 right-10 bg-stone-800 text-white px-8 py-4 shadow-2xl transform translate-y-32 opacity-0 transition-all duration-500 z-[110] border-l-4 border-amber-600">
         <div class="flex items-center space-x-3">
             <i data-lucide="check-circle" class="w-5 h-5 text-amber-500"></i>
             <span id="toast-text" class="text-sm font-medium tracking-wide">資料已送出，請等待專員回應</span>
@@ -369,7 +386,6 @@
     </div>
 
     <script>
-        // 初始化 Lucide 圖示
         lucide.createIcons();
 
         // 導覽列捲動動畫
@@ -384,22 +400,14 @@
             }
         });
 
-        // 手機選單控制
+        // 選單控制
         const mobileMenu = document.getElementById('mobile-menu');
         const mobileBtn = document.getElementById('mobile-menu-btn');
         const closeBtn = document.getElementById('close-menu-btn');
-        const menuLinks = mobileMenu.querySelectorAll('a');
+        mobileBtn.onclick = () => mobileMenu.classList.remove('translate-x-full');
+        closeBtn.onclick = () => mobileMenu.classList.add('translate-x-full');
 
-        mobileBtn.addEventListener('click', () => {
-            mobileMenu.classList.remove('translate-x-full');
-        });
-
-        const closeMenu = () => mobileMenu.classList.add('translate-x-full');
-        closeBtn.addEventListener('click', closeMenu);
-        menuLinks.forEach(link => link.addEventListener('click', closeMenu));
-
-        // 捲動 reveal 動畫 (Intersection Observer)
-        const revealOptions = { threshold: 0.1 };
+        // Reveal Animation
         const revealObserver = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
@@ -407,18 +415,14 @@
                     revealObserver.unobserve(entry.target);
                 }
             });
-        }, revealOptions);
-
+        }, { threshold: 0.1 });
         document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
 
         // 表單處理
         document.getElementById('enroll-form').addEventListener('submit', async (e) => {
             e.preventDefault();
-            
             const submitBtn = document.getElementById('submit-btn');
             const toast = document.getElementById('toast');
-            const toastText = document.getElementById('toast-text');
-            
             submitBtn.disabled = true;
             submitBtn.innerText = "資料處理中...";
 
@@ -429,66 +433,106 @@
                 area: document.getElementById('form-area').value,
                 course: document.getElementById('form-course').value,
                 message: document.getElementById('form-message').value,
-                createdAt: window.serverTimestamp ? window.serverTimestamp() : new Date(),
-                status: 'new'
+                createdAt: window.serverTimestamp ? window.serverTimestamp() : new Date()
             };
 
-            const targetEmail = "pq0800@gmail.com";
-
             try {
-                // 1. 確保已登入
                 let user = window.auth.currentUser;
-                if (!user) {
-                    // 如果尚未登入，嘗試匿名登入
-                    const result = await window.signInAnonymously(window.auth);
-                    user = result.user;
-                }
-
-                // 2. 寫入後台
-                if (window.db && user) {
-                    const inquiriesCol = window.collection(window.db, 'artifacts', window.appId, 'public', 'data', 'courseInquiries');
-                    await window.addDoc(inquiriesCol, formData);
-                } else {
-                    throw new Error("無法連接至資料庫或身份驗證失敗");
-                }
-
-                // 3. 開啟 Email
-                const subject = encodeURIComponent(`[課程諮詢] ${formData.name} - ${formData.area}`);
-                const body = encodeURIComponent(
-                    `姓名：${formData.name}\n` +
-                    `電話：${formData.phone}\n` +
-                    `Line ID：${formData.line}\n` +
-                    `居住區域：${formData.area}\n` +
-                    `諮詢班別：${formData.course}\n` +
-                    `留言訊息：\n${formData.message}`
-                );
-
-                window.location.href = `mailto:${targetEmail}?subject=${subject}&body=${body}`;
-
-                // 4. 顯示成功通知
-                toastText.innerText = "資料已送出，請等待專員回應";
-                toast.classList.remove('translate-y-32', 'opacity-0');
+                if (!user) await window.signInAnonymously(window.auth);
                 
+                const inquiriesCol = window.collection(window.db, 'artifacts', window.appId, 'public', 'data', 'courseInquiries');
+                await window.addDoc(inquiriesCol, formData);
+
+                window.location.href = `mailto:pq0800@gmail.com?subject=${encodeURIComponent('[課程諮詢] '+formData.name)}&body=${encodeURIComponent("姓名："+formData.name+"\n電話："+formData.phone+"\n地區："+formData.area+"\n班別："+formData.course+"\n訊息："+formData.message)}`;
+
+                toast.classList.remove('translate-y-32', 'opacity-0');
                 setTimeout(() => {
                     toast.classList.add('translate-y-32', 'opacity-0');
                     e.target.reset();
                     submitBtn.disabled = false;
                     submitBtn.innerText = "送出諮詢";
                 }, 4000);
-
             } catch (error) {
-                console.error("儲存失敗原因:", error);
-                // 具體的錯誤訊息
-                toastText.innerText = "發生錯誤，請確認網路連線或稍後再試。";
-                toast.classList.remove('translate-y-32', 'opacity-0');
+                console.error(error);
+                alert("發生錯誤，請稍後再試。");
                 submitBtn.disabled = false;
                 submitBtn.innerText = "送出諮詢";
-                
-                setTimeout(() => {
-                    toast.classList.add('translate-y-32', 'opacity-0');
-                }, 5000);
             }
         });
+
+        // --- 管理者後台邏輯 ---
+        function checkAdminPassword() {
+            const pass = prompt("請輸入管理員密碼：");
+            if (pass === "1016") {
+                openAdminPanel();
+            } else if (pass !== null) {
+                alert("密碼錯誤，請再試一次。");
+            }
+        }
+
+        function openAdminPanel() {
+            const panel = document.getElementById('admin-panel');
+            panel.classList.remove('translate-x-full');
+            document.body.style.overflow = 'hidden';
+            fetchInquiries();
+        }
+
+        function closeAdminPanel() {
+            document.getElementById('admin-panel').classList.add('translate-x-full');
+            document.body.style.overflow = '';
+        }
+
+        async function fetchInquiries() {
+            const tbody = document.getElementById('inquiry-tbody');
+            const loading = document.getElementById('loading-state');
+            const refreshIcon = document.getElementById('refresh-icon');
+
+            tbody.innerHTML = '';
+            loading.style.display = 'block';
+            refreshIcon.classList.add('animate-spin');
+
+            try {
+                const q = window.query(
+                    window.collection(window.db, 'artifacts', window.appId, 'public', 'data', 'courseInquiries'),
+                    window.orderBy('createdAt', 'desc')
+                );
+                
+                const querySnapshot = await window.getDocs(q);
+                loading.style.display = 'none';
+
+                if (querySnapshot.empty) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-12 text-center text-stone-400">目前尚無諮詢紀錄</td></tr>';
+                }
+
+                querySnapshot.forEach((doc) => {
+                    const data = doc.data();
+                    const date = data.createdAt?.toDate ? data.createdAt.toDate() : new Date();
+                    const timeStr = date.toLocaleString('zh-TW', { hour12: false });
+
+                    const row = document.createElement('tr');
+                    row.className = 'hover:bg-stone-50 transition';
+                    row.innerHTML = `
+                        <td class="px-6 py-4 whitespace-nowrap text-stone-400 font-mono text-xs">${timeStr}</td>
+                        <td class="px-6 py-4 font-bold text-stone-700">${data.name || '無'}</td>
+                        <td class="px-6 py-4">
+                            <div class="text-stone-800">${data.phone || '無'}</div>
+                            <div class="text-xs text-amber-600">ID: ${data.line || '無'}</div>
+                        </td>
+                        <td class="px-6 py-4 text-stone-600">${data.area || '無'}</td>
+                        <td class="px-6 py-4">
+                            <span class="bg-amber-100 text-amber-800 text-[10px] px-2 py-1 rounded-full font-bold uppercase">${data.course || '一般諮詢'}</span>
+                        </td>
+                        <td class="px-6 py-4 text-stone-500 max-w-xs truncate" title="${data.message}">${data.message || '-'}</td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            } catch (error) {
+                console.error(error);
+                tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-12 text-center text-red-500">資料讀取失敗，請檢查權限設定。</td></tr>';
+            } finally {
+                refreshIcon.classList.remove('animate-spin');
+            }
+        }
     </script>
 </body>
 </html>
