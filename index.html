@@ -152,11 +152,11 @@
         <button id="close-menu-btn" class="absolute top-8 right-8">
             <i data-lucide="x" class="w-8 h-8 text-stone-500"></i>
         </button>
-        <a href="#home" class="text-2xl font-serif">首頁</a>
-        <a href="#about" class="text-2xl font-serif">教學理念</a>
-        <a href="#course-details" class="text-2xl font-serif">課程內容</a>
-        <a href="#pricing" class="text-2xl font-serif">學費方案</a>
-        <a href="#contact" class="text-2xl font-serif">預約報名</a>
+        <a href="#home" class="text-2xl font-serif mobile-link">首頁</a>
+        <a href="#about" class="text-2xl font-serif mobile-link">教學理念</a>
+        <a href="#course-details" class="text-2xl font-serif mobile-link">課程內容</a>
+        <a href="#pricing" class="text-2xl font-serif mobile-link">學費方案</a>
+        <a href="#contact" class="text-2xl font-serif mobile-link">預約報名</a>
     </div>
 
     <!-- Hero Section -->
@@ -484,8 +484,26 @@
         const mobileMenu = document.getElementById('mobile-menu');
         const mobileBtn = document.getElementById('mobile-menu-btn');
         const closeBtn = document.getElementById('close-menu-btn');
-        mobileBtn.onclick = () => mobileMenu.classList.remove('translate-x-full');
-        closeBtn.onclick = () => mobileMenu.classList.add('translate-x-full');
+        const mobileLinks = document.querySelectorAll('.mobile-link');
+
+        // 開啟選單
+        mobileBtn.onclick = () => {
+            mobileMenu.classList.remove('translate-x-full');
+            document.body.style.overflow = 'hidden'; // 防止背景捲動
+        };
+
+        // 關閉選單的統一函式
+        const closeMenu = () => {
+            mobileMenu.classList.add('translate-x-full');
+            document.body.style.overflow = '';
+        };
+
+        closeBtn.onclick = closeMenu;
+
+        // 為每個連結加入點擊後縮回的功能
+        mobileLinks.forEach(link => {
+            link.addEventListener('click', closeMenu);
+        });
 
         const revealObserver = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
