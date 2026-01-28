@@ -115,9 +115,12 @@
             background: #d1d5db;
             cursor: not-allowed;
         }
-        /* 管理者面板動畫 */
-        #admin-panel {
-            transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        /* 面板與彈窗動畫 */
+        #admin-panel, #admin-auth-modal {
+            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .auth-card {
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
         }
     </style>
 </head>
@@ -326,16 +329,39 @@
         <div class="max-w-6xl mx-auto mt-12 flex flex-col md:flex-row justify-between items-center text-[10px] text-stone-500 tracking-widest uppercase">
             <p>&copy; 2026 CORIN ACADEMY. BEAUTY IS A JOURNEY.</p>
             <div class="mt-4 md:mt-0 space-x-4">
-                <span onclick="checkAdminPassword()" class="cursor-pointer hover:text-white transition">Designed for Professional Corin</span>
+                <span id="admin-trigger" class="cursor-pointer hover:text-white transition">Designed for Professional Corin</span>
             </div>
         </div>
     </footer>
 
+    <!-- 管理者密碼驗證彈窗 (自定義美化) -->
+    <div id="admin-auth-modal" class="fixed inset-0 z-[150] bg-stone-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-sm rounded-lg shadow-2xl overflow-hidden reveal active auth-card">
+            <div class="p-8 text-center">
+                <div class="w-16 h-16 bg-stone-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <i data-lucide="lock" class="text-stone-400"></i>
+                </div>
+                <h3 class="text-xl font-bold text-stone-800 mb-2 font-serif tracking-widest">管理權限驗證</h3>
+                <p class="text-sm text-stone-400 mb-8">請輸入管理員密碼以進入後台</p>
+                <div class="relative mb-8">
+                    <input type="password" id="admin-pass-input" 
+                           class="w-full border-b-2 border-stone-200 py-3 text-center text-2xl tracking-[0.5em] focus:outline-none focus:border-amber-600 transition" 
+                           placeholder="••••"
+                           onkeydown="if(event.key==='Enter') verifyAdminPassword()">
+                </div>
+                <div class="flex space-x-4">
+                    <button onclick="closeAuthModal()" class="flex-1 py-3 text-sm font-bold text-stone-400 hover:text-stone-600 transition">取消</button>
+                    <button onclick="verifyAdminPassword()" class="flex-1 bg-stone-900 text-white py-3 rounded shadow-lg text-sm font-bold tracking-widest hover:bg-stone-800 transition">驗證</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- 管理者面板 (預設隱藏) -->
     <div id="admin-panel" class="fixed inset-0 z-[100] bg-white translate-x-full overflow-hidden flex flex-col">
-        <div class="bg-stone-900 text-white px-6 py-4 flex justify-between items-center">
-            <h2 class="font-serif tracking-widest">後台管理中心</h2>
-            <button onclick="closeAdminPanel()" class="hover:text-amber-400 transition">
+        <div class="bg-stone-900 text-white px-6 py-4 flex justify-end items-center">
+            <!-- 抬頭已隱藏 -->
+            <button onclick="closeAdminPanel()" class="hover:text-amber-400 transition p-2">
                 <i data-lucide="x"></i>
             </button>
         </div>
@@ -461,14 +487,32 @@
         });
 
         // --- 管理者後台邏輯 ---
+        const authModal = document.getElementById('admin-auth-modal');
+        const passInput = document.getElementById('admin-pass-input');
+
         function checkAdminPassword() {
-            const pass = prompt("請輸入管理員密碼：");
-            if (pass === "1016") {
+            authModal.classList.remove('hidden');
+            setTimeout(() => passInput.focus(), 100);
+        }
+
+        function closeAuthModal() {
+            authModal.classList.add('hidden');
+            passInput.value = '';
+        }
+
+        function verifyAdminPassword() {
+            if (passInput.value === "1016") {
+                closeAuthModal();
                 openAdminPanel();
-            } else if (pass !== null) {
+            } else {
                 alert("密碼錯誤，請再試一次。");
+                passInput.value = '';
+                passInput.focus();
             }
         }
+
+        // 綁定頁尾點擊
+        document.getElementById('admin-trigger').onclick = checkAdminPassword;
 
         function openAdminPanel() {
             const panel = document.getElementById('admin-panel');
@@ -515,12 +559,12 @@
                         <td class="px-6 py-4 whitespace-nowrap text-stone-400 font-mono text-xs">${timeStr}</td>
                         <td class="px-6 py-4 font-bold text-stone-700">${data.name || '無'}</td>
                         <td class="px-6 py-4">
-                            <div class="text-stone-800">${data.phone || '無'}</div>
-                            <div class="text-xs text-amber-600">ID: ${data.line || '無'}</div>
+                            <div class="text-stone-800 font-medium">${data.phone || '無'}</div>
+                            <div class="text-xs text-amber-600 font-mono">Line: ${data.line || '無'}</div>
                         </td>
                         <td class="px-6 py-4 text-stone-600">${data.area || '無'}</td>
                         <td class="px-6 py-4">
-                            <span class="bg-amber-100 text-amber-800 text-[10px] px-2 py-1 rounded-full font-bold uppercase">${data.course || '一般諮詢'}</span>
+                            <span class="bg-stone-100 text-stone-600 text-[10px] px-2 py-1 rounded font-bold uppercase tracking-tighter">${data.course || '一般諮詢'}</span>
                         </td>
                         <td class="px-6 py-4 text-stone-500 max-w-xs truncate" title="${data.message}">${data.message || '-'}</td>
                     `;
@@ -528,7 +572,7 @@
                 });
             } catch (error) {
                 console.error(error);
-                tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-12 text-center text-red-500">資料讀取失敗，請檢查權限設定。</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-12 text-center text-red-500 italic">資料讀取失敗，請檢查網路或權限。</td></tr>';
             } finally {
                 refreshIcon.classList.remove('animate-spin');
             }
