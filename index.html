@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Corin Beauty | 日式除毛專業教學課程</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            scroll-behavior: smooth;
+        }
+        .font-serif {
+            font-family: 'Playfair Display', serif;
+        }
+        /* 滾動動畫設定 */
+        .reveal {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: all 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .bg-soft-gold {
+            background-color: #fdfaf5;
+        }
+        .nav-scrolled {
+            background-color: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(12px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+        }
+        .image-overlay {
+            background: linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.5));
+        }
+        /* 特殊按鈕樣式 */
+        .btn-gold {
+            background: #b49164;
+            color: white;
+            transition: all 0.3s;
+        }
+        .btn-gold:hover {
+            background: #96754b;
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body class="bg-white text-gray-800">
+
+    <!-- 導覽列 -->
+    <nav id="navbar" class="fixed w-full z-50 transition-all duration-500 py-6 px-6 md:px-12 flex justify-between items-center">
+        <div class="text-2xl font-serif font-bold tracking-[0.2em] text-stone-800">CORIN <span class="text-stone-400 font-light">ACADEMY</span></div>
+        
+        <!-- 桌機選單 -->
+        <div class="hidden md:flex space-x-10 text-xs font-bold tracking-widest uppercase">
+            <a href="#home" class="hover:text-amber-700 transition">首頁</a>
+            <a href="#about" class="hover:text-amber-700 transition">教學理念</a>
+            <a href="#curriculum" class="hover:text-amber-700 transition">課程大綱</a>
+            <a href="#features" class="hover:text-amber-700 transition">技術優勢</a>
+            <a href="#contact" class="hover:text-amber-700 transition">預約報名</a>
+        </div>
+
+        <!-- 手機選單按鈕 -->
+        <button id="mobile-menu-btn" class="md:hidden">
+            <i data-lucide="menu" class="w-6 h-6"></i>
+        </button>
+    </nav>
+
+    <!-- 手機側邊欄 -->
+    <div id="mobile-menu" class="fixed inset-0 bg-stone-50 z-[60] flex flex-col items-center justify-center space-y-8 transform translate-x-full transition-transform duration-500">
+        <button id="close-menu-btn" class="absolute top-8 right-8">
+            <i data-lucide="x" class="w-8 h-8 text-stone-500"></i>
+        </button>
+        <a href="#home" class="text-2xl font-serif">Home</a>
+        <a href="#about" class="text-2xl font-serif">Philosophy</a>
+        <a href="#curriculum" class="text-2xl font-serif">Curriculum</a>
+        <a href="#features" class="text-2xl font-serif">Technique</a>
+        <a href="#contact" class="text-2xl font-serif">Enrollment</a>
+    </div>
+
+    <!-- Hero Section -->
+    <section id="home" class="relative h-screen flex items-center justify-center">
+        <div class="absolute inset-0 z-0">
+            <img src="https://images.unsplash.com/photo-1516549655169-df83a0774514?auto=format&fit=crop&w=1920&q=80" alt="Training Background" class="w-full h-full object-cover">
+            <div class="absolute inset-0 image-overlay"></div>
+        </div>
+        
+        <div class="relative z-10 text-center px-4">
+            <h2 class="text-white text-sm md:text-base tracking-[0.5em] mb-6 reveal uppercase">Professional Hair Removal Training</h2>
+            <h1 class="text-white text-5xl md:text-8xl font-serif mb-10 reveal" style="transition-delay: 200ms;">日式極致除毛<br><span class="text-3xl md:text-5xl font-light italic">創業全科班</span></h1>
+            <div class="reveal" style="transition-delay: 400ms;">
+                <a href="#contact" class="inline-block bg-white text-stone-900 px-10 py-4 hover:bg-stone-900 hover:text-white transition duration-500 tracking-[0.2em] font-bold text-sm">索取簡章</a>
+            </div>
+        </div>
+        
+        <div class="absolute bottom-12 left-1/2 -translate-x-1/2 text-white/50 animate-bounce">
+            <i data-lucide="mouse" class="w-5 h-5"></i>
+        </div>
+    </section>
+
+    <!-- About / Philosophy -->
+    <section id="about" class="py-24 px-6 md:px-12 bg-white">
+        <div class="max-w-5xl mx-auto text-center reveal">
+            <span class="text-amber-600 font-serif italic text-xl block mb-4">Our Philosophy</span>
+            <h3 class="text-4xl font-bold mb-10 tracking-tight text-stone-800">從理論到實戰，打造除毛美學專家</h3>
+            <p class="text-stone-500 leading-[2] max-w-3xl mx-auto mb-16">
+                我們不只教授技術，更傳遞「安全、快速、無痛」的日式服務精神。Corin Academy 的課程設計旨在讓零基礎的學員，在最短的時間內掌握核心操作規範，並具備獨立創業的專業素養。
+            </p>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+                <div class="space-y-3">
+                    <div class="text-3xl font-serif text-amber-700">1-on-1</div>
+                    <div class="text-xs tracking-widest text-stone-400">小班制精緻教學</div>
+                </div>
+                <div class="space-y-3">
+                    <div class="text-3xl font-serif text-amber-700">100%</div>
+                    <div class="text-xs tracking-widest text-stone-400">實操模擬練習</div>
+                </div>
+                <div class="space-y-3">
+                    <div class="text-3xl font-serif text-amber-700">Diploma</div>
+                    <div class="text-xs tracking-widest text-stone-400">結業證書頒發</div>
+                </div>
+                <div class="space-y-3">
+                    <div class="text-3xl font-serif text-amber-700">Support</div>
+                    <div class="text-xs tracking-widest text-stone-400">創業行銷輔導</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Curriculum Section (The "Items") -->
+    <section id="curriculum" class="py-24 px-6 md:px-12 bg-soft-gold">
+        <div class="max-w-6xl mx-auto">
+            <div class="flex flex-col md:flex-row justify-between items-end mb-16 reveal">
+                <div class="mb-6 md:mb-0">
+                    <h2 class="text-4xl font-serif mb-4">課程核心項目</h2>
+                    <div class="w-20 h-1 bg-amber-700"></div>
+                </div>
+                <p class="text-stone-400 text-sm tracking-widest italic">Curriculum Highlights</p>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-x-12 gap-y-16">
+                <!-- 項目 1 -->
+                <div class="flex space-x-6 reveal">
+                    <div class="text-4xl font-serif text-stone-300">01</div>
+                    <div>
+                        <h4 class="text-xl font-bold mb-3">皮膚學與毛髮生理學</h4>
+                        <p class="text-stone-500 text-sm leading-relaxed">深入了解毛囊生長週期（成長期、退行期、休止期）、皮膚類型辨識及除毛禁忌症，確保操作安全性。</p>
+                    </div>
+                </div>
+
+                <!-- 項目 2 -->
+                <div class="flex space-x-6 reveal" style="transition-delay: 100ms;">
+                    <div class="text-4xl font-serif text-stone-300">02</div>
+                    <div>
+                        <h4 class="text-xl font-bold mb-3">日式光電除毛原理解析</h4>
+                        <p class="text-stone-500 text-sm leading-relaxed">解析不同波長光能對黑色素的作用、冷卻系統的操作規範，以及如何根據不同部位調整參數。</p>
+                    </div>
+                </div>
+
+                <!-- 項目 3 -->
+                <div class="flex space-x-6 reveal" style="transition-delay: 200ms;">
+                    <div class="text-4xl font-serif text-stone-300">03</div>
+                    <div>
+                        <h4 class="text-xl font-bold mb-3">全方位實操演練</h4>
+                        <p class="text-stone-500 text-sm leading-relaxed">包含臉部細毛、腋下、四肢及私密處（VIO）的實作流程，掌握無死角的操作手感與角度。</p>
+                    </div>
+                </div>
+
+                <!-- 項目 4 -->
+                <div class="flex space-x-6 reveal" style="transition-delay: 300ms;">
+                    <div class="text-4xl font-serif text-stone-300">04</div>
+                    <div>
+                        <h4 class="text-xl font-bold mb-3">課後照護與顧客諮詢</h4>
+                        <p class="text-stone-500 text-sm leading-relaxed">教授如何進行術前溝通、術後居家護理建議，以及處理突發狀況的專業應對標準。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Feature Video / Big Image -->
+    <section id="features" class="relative py-32 overflow-hidden bg-stone-900">
+        <div class="absolute inset-0 opacity-40">
+            <img src="https://images.unsplash.com/photo-1527799822367-474857a3f447?auto=format&fit=crop&w=1920&q=80" alt="Advanced Tech" class="w-full h-full object-cover">
+        </div>
+        <div class="relative z-10 max-w-4xl mx-auto px-6 text-center text-white reveal">
+            <h2 class="text-3xl md:text-5xl font-serif mb-8 italic">為什麼選擇「日式除毛」技術？</h2>
+            <div class="grid md:grid-cols-3 gap-8 mt-16 text-left">
+                <div class="p-6 border border-white/20 backdrop-blur-sm">
+                    <h5 class="font-bold mb-4 flex items-center"><i data-lucide="zap" class="w-4 h-4 mr-2 text-amber-400"></i> 極速效率</h5>
+                    <p class="text-xs text-white/70 leading-relaxed">採用滑動式操作，全身除毛僅需 30-40 分鐘，大大縮短顧客等待時間。</p>
+                </div>
+                <div class="p-6 border border-white/20 backdrop-blur-sm">
+                    <h5 class="font-bold mb-4 flex items-center"><i data-lucide="wind" class="w-4 h-4 mr-2 text-amber-400"></i> 無痛體驗</h5>
+                    <p class="text-xs text-white/70 leading-relaxed">先進的接觸式冷卻系統，讓過程幾乎無感，是怕痛顧客的首選技術。</p>
+                </div>
+                <div class="p-6 border border-white/20 backdrop-blur-sm">
+                    <h5 class="font-bold mb-4 flex items-center"><i data-lucide="award" class="w-4 h-4 mr-2 text-amber-400"></i> 持久亮白</h5>
+                    <p class="text-xs text-white/70 leading-relaxed">不傷表皮，同時改善毛孔粗大與黑色素沉澱，除毛兼具美膚效果。</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing / Enrollment -->
+    <section id="contact" class="py-24 px-6 md:px-12 bg-white">
+        <div class="max-w-6xl mx-auto grid md:grid-cols-2 gap-20">
+            <div class="reveal">
+                <h2 class="text-4xl font-serif mb-8">報名諮詢</h2>
+                <p class="text-stone-500 mb-12">如果您對課程有任何疑問，或想預約參觀教學空間，請填寫下方表單或直接透過官方 LINE 聯繫我們。</p>
+                
+                <div class="space-y-8">
+                    <div class="flex items-center space-x-6">
+                        <div class="w-12 h-12 bg-stone-100 flex items-center justify-center rounded-full">
+                            <i data-lucide="mail" class="w-5 h-5 text-amber-700"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs text-stone-400 uppercase tracking-widest">Email Address</p>
+                            <p class="font-medium text-stone-800">academy@corinbeauty.com</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-6">
+                        <div class="w-12 h-12 bg-stone-100 flex items-center justify-center rounded-full">
+                            <i data-lucide="message-square" class="w-5 h-5 text-amber-700"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs text-stone-400 uppercase tracking-widest">Official LINE</p>
+                            <p class="font-medium text-stone-800">@corin_academy</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-6">
+                        <div class="w-12 h-12 bg-stone-100 flex items-center justify-center rounded-full">
+                            <i data-lucide="instagram" class="w-5 h-5 text-amber-700"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs text-stone-400 uppercase tracking-widest">Instagram</p>
+                            <p class="font-medium text-stone-800">corin.beauty_training</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-stone-50 p-10 reveal" style="transition-delay: 200ms;">
+                <h3 class="text-xl font-bold mb-8 flex items-center"><i data-lucide="edit-3" class="mr-2 w-5 h-5 text-amber-700"></i> 填寫需求</h3>
+                <form id="enroll-form" class="space-y-6">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="space-y-2">
+                            <label class="text-xs font-bold uppercase tracking-wider text-stone-400">姓名</label>
+                            <input type="text" required class="w-full bg-transparent border-b border-stone-300 py-2 focus:outline-none focus:border-amber-700 transition">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-xs font-bold uppercase tracking-wider text-stone-400">電話</label>
+                            <input type="tel" required class="w-full bg-transparent border-b border-stone-300 py-2 focus:outline-none focus:border-amber-700 transition">
+                        </div>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-xs font-bold uppercase tracking-wider text-stone-400">諮詢班別</label>
+                        <select class="w-full bg-transparent border-b border-stone-300 py-2 focus:outline-none focus:border-amber-700 transition">
+                            <option>日式除毛全科班</option>
+                            <option>私密處進階實操班</option>
+                            <option>創業行銷輔導方案</option>
+                        </select>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-xs font-bold uppercase tracking-wider text-stone-400">留言訊息</label>
+                        <textarea rows="3" class="w-full bg-transparent border-b border-stone-300 py-2 focus:outline-none focus:border-amber-700 transition" placeholder="例如：想了解學費、開課日期..."></textarea>
+                    </div>
+                    <button type="submit" class="w-full btn-gold py-5 font-bold tracking-[0.3em] uppercase text-xs mt-4">送出諮詢</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-stone-900 text-white py-20 px-6 md:px-12">
+        <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center border-b border-white/10 pb-12">
+            <div class="text-3xl font-serif font-bold tracking-[0.2em] mb-8 md:mb-0">CORIN <span class="text-stone-500 font-light">ACADEMY</span></div>
+            <div class="flex space-x-12 text-xs tracking-widest text-stone-400 uppercase">
+                <a href="#about" class="hover:text-white transition">About</a>
+                <a href="#curriculum" class="hover:text-white transition">Course</a>
+                <a href="#" class="hover:text-white transition">FAQ</a>
+                <a href="#" class="hover:text-white transition">Policy</a>
+            </div>
+        </div>
+        <div class="max-w-6xl mx-auto mt-12 flex flex-col md:flex-row justify-between items-center text-[10px] text-stone-500 tracking-widest uppercase">
+            <p>&copy; 2026 CORIN ACADEMY. BEAUTY IS A JOURNEY.</p>
+            <div class="mt-4 md:mt-0 space-x-4">
+                <span>Designed for Professional Technicians</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Toast 通知 -->
+    <div id="toast" class="fixed bottom-10 right-10 bg-stone-800 text-white px-8 py-4 shadow-2xl transform translate-y-32 opacity-0 transition-all duration-500 z-[100] border-l-4 border-amber-600">
+        <div class="flex items-center space-x-3">
+            <i data-lucide="check-circle" class="w-5 h-5 text-amber-500"></i>
+            <span class="text-sm font-medium tracking-wide">您的諮詢已送出，我們將盡快回覆您！</span>
+        </div>
+    </div>
+
+    <script>
+        // 初始化 Lucide 圖示
+        lucide.createIcons();
+
+        // 導覽列捲動動畫
+        const navbar = document.getElementById('navbar');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 80) {
+                navbar.classList.add('nav-scrolled', 'py-4');
+                navbar.classList.remove('py-6');
+            } else {
+                navbar.classList.remove('nav-scrolled', 'py-4');
+                navbar.classList.add('py-6');
+            }
+        });
+
+        // 手機選單控制
+        const mobileMenu = document.getElementById('mobile-menu');
+        const mobileBtn = document.getElementById('mobile-menu-btn');
+        const closeBtn = document.getElementById('close-menu-btn');
+        const menuLinks = mobileMenu.querySelectorAll('a');
+
+        mobileBtn.addEventListener('click', () => {
+            mobileMenu.classList.remove('translate-x-full');
+        });
+
+        const closeMenu = () => mobileMenu.classList.add('translate-x-full');
+        closeBtn.addEventListener('click', closeMenu);
+        menuLinks.forEach(link => link.addEventListener('click', closeMenu));
+
+        // 捲動 reveal 動畫 (Intersection Observer)
+        const revealOptions = { threshold: 0.1 };
+        const revealObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                    // 一旦動畫觸過就不再偵測，提高效能
+                    revealObserver.unobserve(entry.target);
+                }
+            });
+        }, revealOptions);
+
+        document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+        // 表單處理
+        document.getElementById('enroll-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const toast = document.getElementById('toast');
+            toast.classList.remove('translate-y-32', 'opacity-0');
+            
+            setTimeout(() => {
+                toast.classList.add('translate-y-32', 'opacity-0');
+                e.target.reset();
+            }, 4000);
+        });
+    </script>
+</body>
+</html>
