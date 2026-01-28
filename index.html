@@ -7,6 +7,67 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Firebase SDK 導入 -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js";
+
+        // ==========================================
+        // Firebase 設定區 - 已寫入您的專屬代碼
+        // ==========================================
+        let firebaseConfig = {
+            apiKey: "AIzaSyAXahIPb1rI1cpDUCSb2yDQJwwJPItnlJE",
+            authDomain: "corin-beauty-web.firebaseapp.com",
+            projectId: "corin-beauty-web",
+            storageBucket: "corin-beauty-web.firebasestorage.app",
+            messagingSenderId: "290659856861",
+            appId: "1:290659856861:web:1bc4e37fd4eca502218634",
+            measurementId: "G-L6BTPP1W3B"
+        };
+
+        // 如果環境中有預定義的 config 則優先使用 (預覽環境相容性)
+        if (typeof __firebase_config !== 'undefined') {
+            try {
+                firebaseConfig = JSON.parse(__firebase_config);
+            } catch(e) {
+                console.error("Config parse error");
+            }
+        }
+
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        
+        // 設定路徑用的 appId
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'corin-beauty-app';
+
+        // 身份驗證初始化
+        const initAuth = async () => {
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (error) {
+                console.error("Auth error:", error);
+            }
+        };
+        initAuth();
+
+        // 將方法掛載到 window 供表單使用
+        window.db = db;
+        window.appId = appId;
+        window.addDoc = addDoc;
+        window.collection = collection;
+        window.serverTimestamp = serverTimestamp;
+        window.auth = auth;
+    </script>
+
     <style>
         body {
             font-family: 'Noto Sans TC', sans-serif;
@@ -31,7 +92,7 @@
         .nav-scrolled {
             background-color: rgba(255, 255, 255, 0.9);
             backdrop-filter: blur(12px);
-            box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
         }
         .image-overlay {
             background: linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.5));
@@ -46,13 +107,17 @@
             background: #96754b;
             transform: translateY(-2px);
         }
+        .btn-gold:disabled {
+            background: #d1d5db;
+            cursor: not-allowed;
+        }
     </style>
 </head>
 <body class="bg-white text-gray-800">
 
     <!-- 導覽列 -->
     <nav id="navbar" class="fixed w-full z-50 transition-all duration-500 py-6 px-6 md:px-12 flex justify-between items-center">
-        <div class="text-2xl font-serif font-bold tracking-[0.2em] text-stone-800">CORIN <span class="text-stone-400 font-light">ACADEMY</span></div>
+        <div class="text-2xl font-serif font-bold tracking-[0.2em] text-stone- Stone-800">CORIN <span class="text-stone-400 font-light">ACADEMY</span></div>
         
         <!-- 桌機選單 -->
         <div class="hidden md:flex space-x-10 text-xs font-bold tracking-widest uppercase">
@@ -69,7 +134,7 @@
         </button>
     </nav>
 
-    <!-- 手機側邊欄 - 選單文字已改為中文 -->
+    <!-- 手機側邊欄 -->
     <div id="mobile-menu" class="fixed inset-0 bg-stone-50 z-[60] flex flex-col items-center justify-center space-y-8 transform translate-x-full transition-transform duration-500">
         <button id="close-menu-btn" class="absolute top-8 right-8">
             <i data-lucide="x" class="w-8 h-8 text-stone-500"></i>
@@ -229,7 +294,13 @@
                         </div>
                         <div class="space-y-2">
                             <label class="text-xs font-bold uppercase tracking-wider text-stone-400">電話</label>
-                            <input type="tel" id="form-phone" required class="w-full bg-transparent border-b border-stone-300 py-2 focus:outline-none focus:border-amber-700 transition">
+                            <!-- 加上強制驗證：09開頭及後面8碼數字，總共10位 -->
+                            <input type="tel" id="form-phone" required 
+                                   pattern="09[0-9]{8}" 
+                                   maxlength="10" 
+                                   title="請輸入正確的 10 位手機號碼（例：0912345678）"
+                                   class="w-full bg-transparent border-b border-stone-300 py-2 focus:outline-none focus:border-amber-700 transition" 
+                                   placeholder="例：0912345678">
                         </div>
                     </div>
                     <div class="grid grid-cols-2 gap-4">
@@ -254,7 +325,7 @@
                         <label class="text-xs font-bold uppercase tracking-wider text-stone-400">留言訊息</label>
                         <textarea id="form-message" rows="3" class="w-full bg-transparent border-b border-stone-300 py-2 focus:outline-none focus:border-amber-700 transition" placeholder="例如：想了解學費、開課日期..."></textarea>
                     </div>
-                    <button type="submit" class="w-full btn-gold py-5 font-bold tracking-[0.3em] uppercase text-xs mt-4">送出諮詢</button>
+                    <button type="submit" id="submit-btn" class="w-full btn-gold py-5 font-bold tracking-[0.3em] uppercase text-xs mt-4">送出諮詢</button>
                 </form>
             </div>
         </div>
@@ -283,7 +354,7 @@
     <div id="toast" class="fixed bottom-10 right-10 bg-stone-800 text-white px-8 py-4 shadow-2xl transform translate-y-32 opacity-0 transition-all duration-500 z-[100] border-l-4 border-amber-600">
         <div class="flex items-center space-x-3">
             <i data-lucide="check-circle" class="w-5 h-5 text-amber-500"></i>
-            <span class="text-sm font-medium tracking-wide">您的諮詢已送出，我們將盡快回覆您！</span>
+            <span id="toast-text" class="text-sm font-medium tracking-wide">資料已送出，請等待專員回應</span>
         </div>
     </div>
 
@@ -330,37 +401,72 @@
 
         document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
 
-        // 表單處理：發送到指定 Email
-        document.getElementById('enroll-form').addEventListener('submit', (e) => {
+        // 表單處理
+        document.getElementById('enroll-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            const name = document.getElementById('form-name').value;
-            const phone = document.getElementById('form-phone').value;
-            const line = document.getElementById('form-line').value;
-            const area = document.getElementById('form-area').value;
-            const course = document.getElementById('form-course').value;
-            const message = document.getElementById('form-message').value;
+            const submitBtn = document.getElementById('submit-btn');
+            const toast = document.getElementById('toast');
+            const toastText = document.getElementById('toast-text');
+            
+            submitBtn.disabled = true;
+            submitBtn.innerText = "資料處理中...";
+
+            const formData = {
+                name: document.getElementById('form-name').value,
+                phone: document.getElementById('form-phone').value,
+                line: document.getElementById('form-line').value,
+                area: document.getElementById('form-area').value,
+                course: document.getElementById('form-course').value,
+                message: document.getElementById('form-message').value,
+                createdAt: window.serverTimestamp ? window.serverTimestamp() : new Date(),
+                status: 'new'
+            };
+
             const targetEmail = "pq0800@gmail.com";
 
-            const subject = encodeURIComponent(`[課程諮詢] ${name} - ${area}`);
-            const body = encodeURIComponent(
-                `姓名：${name}\n` +
-                `電話：${phone}\n` +
-                `Line ID：${line}\n` +
-                `居住區域：${area}\n` +
-                `諮詢班別：${course}\n` +
-                `留言訊息：\n${message}`
-            );
+            try {
+                // 1. 寫入後台
+                if (window.db && window.auth && window.auth.currentUser) {
+                    const inquiriesCol = window.collection(window.db, 'artifacts', window.appId, 'public', 'data', 'courseInquiries');
+                    await window.addDoc(inquiriesCol, formData);
+                }
 
-            window.location.href = `mailto:${targetEmail}?subject=${subject}&body=${body}`;
+                // 2. 開啟 Email
+                const subject = encodeURIComponent(`[課程諮詢] ${formData.name} - ${formData.area}`);
+                const body = encodeURIComponent(
+                    `姓名：${formData.name}\n` +
+                    `電話：${formData.phone}\n` +
+                    `Line ID：${formData.line}\n` +
+                    `居住區域：${formData.area}\n` +
+                    `諮詢班別：${formData.course}\n` +
+                    `留言訊息：\n${formData.message}`
+                );
 
-            const toast = document.getElementById('toast');
-            toast.classList.remove('translate-y-32', 'opacity-0');
-            
-            setTimeout(() => {
-                toast.classList.add('translate-y-32', 'opacity-0');
-                e.target.reset();
-            }, 4000);
+                window.location.href = `mailto:${targetEmail}?subject=${subject}&body=${body}`;
+
+                // 3. 顯示成功通知
+                toastText.innerText = "資料已送出，請等待專員回應";
+                toast.classList.remove('translate-y-32', 'opacity-0');
+                
+                setTimeout(() => {
+                    toast.classList.add('translate-y-32', 'opacity-0');
+                    e.target.reset();
+                    submitBtn.disabled = false;
+                    submitBtn.innerText = "送出諮詢";
+                }, 4000);
+
+            } catch (error) {
+                console.error("儲存失敗:", error);
+                toastText.innerText = "發生錯誤，請稍後再試。";
+                toast.classList.remove('translate-y-32', 'opacity-0');
+                submitBtn.disabled = false;
+                submitBtn.innerText = "送出諮詢";
+                
+                setTimeout(() => {
+                    toast.classList.add('translate-y-32', 'opacity-0');
+                }, 3000);
+            }
         });
     </script>
 </body>
