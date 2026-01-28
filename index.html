@@ -38,7 +38,14 @@
         }
 
         const app = initializeApp(firebaseConfig);
-        const analytics = getAnalytics(app);
+        
+        // 防護 Analytics 初始化
+        try {
+            const analytics = getAnalytics(app);
+        } catch (e) {
+            console.warn("Analytics initialization skipped");
+        }
+
         const auth = getAuth(app);
         const db = getFirestore(app);
         
@@ -66,6 +73,9 @@
         window.collection = collection;
         window.serverTimestamp = serverTimestamp;
         window.auth = auth;
+        // 額外導出登入方法以備不時之需
+        window.signInAnonymously = signInAnonymously;
+        window.signInWithCustomToken = signInWithCustomToken;
     </script>
 
     <style>
@@ -117,7 +127,7 @@
 
     <!-- 導覽列 -->
     <nav id="navbar" class="fixed w-full z-50 transition-all duration-500 py-6 px-6 md:px-12 flex justify-between items-center">
-        <div class="text-2xl font-serif font-bold tracking-[0.2em] text-stone- Stone-800">CORIN <span class="text-stone-400 font-light">ACADEMY</span></div>
+        <div class="text-2xl font-serif font-bold tracking-[0.2em] text-stone-800">CORIN <span class="text-stone-400 font-light">ACADEMY</span></div>
         
         <!-- 桌機選單 -->
         <div class="hidden md:flex space-x-10 text-xs font-bold tracking-widest uppercase">
@@ -426,13 +436,23 @@
             const targetEmail = "pq0800@gmail.com";
 
             try {
-                // 1. 寫入後台
-                if (window.db && window.auth && window.auth.currentUser) {
-                    const inquiriesCol = window.collection(window.db, 'artifacts', window.appId, 'public', 'data', 'courseInquiries');
-                    await window.addDoc(inquiriesCol, formData);
+                // 1. 確保已登入
+                let user = window.auth.currentUser;
+                if (!user) {
+                    // 如果尚未登入，嘗試匿名登入
+                    const result = await window.signInAnonymously(window.auth);
+                    user = result.user;
                 }
 
-                // 2. 開啟 Email
+                // 2. 寫入後台
+                if (window.db && user) {
+                    const inquiriesCol = window.collection(window.db, 'artifacts', window.appId, 'public', 'data', 'courseInquiries');
+                    await window.addDoc(inquiriesCol, formData);
+                } else {
+                    throw new Error("無法連接至資料庫或身份驗證失敗");
+                }
+
+                // 3. 開啟 Email
                 const subject = encodeURIComponent(`[課程諮詢] ${formData.name} - ${formData.area}`);
                 const body = encodeURIComponent(
                     `姓名：${formData.name}\n` +
@@ -445,7 +465,7 @@
 
                 window.location.href = `mailto:${targetEmail}?subject=${subject}&body=${body}`;
 
-                // 3. 顯示成功通知
+                // 4. 顯示成功通知
                 toastText.innerText = "資料已送出，請等待專員回應";
                 toast.classList.remove('translate-y-32', 'opacity-0');
                 
@@ -457,15 +477,16 @@
                 }, 4000);
 
             } catch (error) {
-                console.error("儲存失敗:", error);
-                toastText.innerText = "發生錯誤，請稍後再試。";
+                console.error("儲存失敗原因:", error);
+                // 具體的錯誤訊息
+                toastText.innerText = "發生錯誤，請確認網路連線或稍後再試。";
                 toast.classList.remove('translate-y-32', 'opacity-0');
                 submitBtn.disabled = false;
                 submitBtn.innerText = "送出諮詢";
                 
                 setTimeout(() => {
                     toast.classList.add('translate-y-32', 'opacity-0');
-                }, 3000);
+                }, 5000);
             }
         });
     </script>
